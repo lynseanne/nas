@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6b4ea8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NAS">
+<title>NAS</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>
+/* apply saved theme + text-case before first paint, so there's no flash */
+(function(){try{var s=JSON.parse(localStorage.getItem('na_settings')||'{}');var r=document.documentElement;
+  if(s.theme==='dark'||s.theme==='light')r.dataset.theme=s.theme;
+  if(s.textCase==='normal')r.classList.add('truecase');}catch(e){}})();
+</script>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<!-- couch motifs (pwa/couch.svg, inlined — external <use> does not resolve) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<!-- couch.svg — motifs drawn from the painted couch (OINK · MOO, Charlotte).
+
+     The couch works because a heavy black outline holds every wild colour together.
+     Every symbol here follows that rule: flat saturated fills, one thick dark stroke,
+     no gradients, no shading. They are decoration only — always aria-hidden, never
+     the sole carrier of meaning.
+
+     Colours come from the --c-* tokens so they re-theme with the app; the outline is
+     --c-outline, which lightens in dark mode so the ink line doesn't disappear.
+
+     Use: <svg class="doodle"><use href="couch.svg#d-flower"/></svg>
+-->
+<defs>
+  <style>
+    .o { fill: none; stroke: var(--c-outline, #1B1526); stroke-width: 5;
+         stroke-linecap: round; stroke-linejoin: round; }
+    .of{ stroke: var(--c-outline, #1B1526); stroke-width: 5; stroke-linejoin: round; }
+  </style>
+</defs>
+
+<!-- flower — the six-petal bloom on the left arm -->
+<symbol id="d-flower" viewBox="0 0 100 100">
+  <g class="of">
+    <circle cx="50" cy="22" r="15" fill="var(--c-bubble,#F58ABF)"/>
+    <circle cx="74" cy="36" r="15" fill="var(--c-marigold,#F4B62C)"/>
+    <circle cx="74" cy="64" r="15" fill="var(--c-moo,#14BCD1)"/>
+    <circle cx="50" cy="78" r="15" fill="var(--c-grape,#8A3DC6)"/>
+    <circle cx="26" cy="64" r="15" fill="var(--c-meadow,#5FBE44)"/>
+    <circle cx="26" cy="36" r="15" fill="var(--c-coral,#F1663F)"/>
+    <circle cx="50" cy="50" r="14" fill="var(--c-oink,#E22C8E)"/>
+  </g>
+</symbol>
+
+<!-- eye — the wide staring eye near the middle cushion -->
+<symbol id="d-eye" viewBox="0 0 100 100">
+  <g class="of">
+    <path d="M8 50 Q50 12 92 50 Q50 88 8 50 Z" fill="var(--c-sky,#63C6E8)"/>
+    <circle cx="50" cy="50" r="20" fill="var(--c-marigold,#F4B62C)"/>
+    <circle cx="50" cy="50" r="9" fill="var(--c-outline,#1B1526)" stroke="none"/>
+  </g>
+</symbol>
+
+<!-- spiral — the big swirl on the seat.
+     Built from half-turn arcs of growing radius (6, 10, 14, 18, 22), which draws a true
+     spiral in a few bytes; the sampled-polyline version was 10x the size and no smoother. -->
+<symbol id="d-spiral" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="42" fill="var(--c-cobalt,#2A57D4)" class="of"/>
+  <path class="o" stroke="var(--c-sky,#63C6E8)" stroke-width="7" fill="none"
+        d="M54 50 A6 6 0 0 1 42 50 A10 10 0 0 1 62 50 A14 14 0 0 1 34 50
+           A18 18 0 0 1 70 50 A22 22 0 0 1 26 50"/>
+</symbol>
+
+<!-- star burst — the little sparks scattered across the back -->
+<symbol id="d-star" viewBox="0 0 100 100">
+  <path class="of" fill="var(--c-marigold,#F4B62C)"
+        d="M50 6 L61 36 L92 34 L67 54 L79 84 L50 66 L21 84 L33 54 L8 34 L39 36 Z"/>
+</symbol>
+
+<!-- the little pink cow on the back cushion — the one the couch is named for -->
+<symbol id="d-cow" viewBox="0 0 100 100">
+  <g class="of">
+    <path d="M22 76 L22 90 M38 76 L38 90 M58 76 L58 90 M72 76 L72 90" class="o"/>
+    <path d="M14 54 Q6 44 10 34" class="o"/>
+    <rect x="12" y="40" width="64" height="36" rx="14" fill="var(--c-bubble,#F58ABF)"/>
+    <ellipse cx="34" cy="56" rx="11" ry="8" fill="var(--c-oink,#E22C8E)"/>
+    <path d="M72 30 Q70 20 78 22 M92 30 Q95 20 87 23" class="o"/>
+    <circle cx="82" cy="44" r="16" fill="var(--c-bubble,#F58ABF)"/>
+    <circle cx="78" cy="40" r="3.5" fill="var(--c-outline,#1B1526)" stroke="none"/>
+    <path d="M76 52 Q84 56 90 52" class="o" stroke-width="4"/>
+  </g>
+</symbol>
+
+<!-- blob face — the stacked lozenge characters along the base -->
+<symbol id="d-face" viewBox="0 0 100 100">
+  <g class="of">
+    <rect x="18" y="10" width="64" height="80" rx="30" fill="var(--c-meadow,#5FBE44)"/>
+    <circle cx="38" cy="42" r="7" fill="var(--c-outline,#1B1526)" stroke="none"/>
+    <circle cx="62" cy="42" r="7" fill="var(--c-outline,#1B1526)" stroke="none"/>
+    <path d="M36 64 Q50 76 64 64" class="o"/>
+  </g>
+</symbol>
+
+<!-- wave — the ribbon stripes running under the seat -->
+<symbol id="d-wave" viewBox="0 0 100 100">
+  <g class="o" stroke-width="9">
+    <path d="M6 32 Q28 12 50 32 T94 32" stroke="var(--c-coral,#F1663F)"/>
+    <path d="M6 54 Q28 34 50 54 T94 54" stroke="var(--c-moo,#14BCD1)"/>
+    <path d="M6 76 Q28 56 50 76 T94 76" stroke="var(--c-grape,#8A3DC6)"/>
+  </g>
+</symbol>
+
+<!-- heart — the small hearts tucked in the right cushion -->
+<symbol id="d-heart" viewBox="0 0 100 100">
+  <path class="of" fill="var(--c-oink,#E22C8E)"
+        d="M50 84 C18 62 10 44 20 30 C30 16 46 20 50 34 C54 20 70 16 80 30 C90 44 82 62 50 84 Z"/>
+</symbol>
+</svg>
+
+
+<header class="topbar">
+  <button class="brand" data-nav="home">🐾 NAS</button>
+  <button class="nav-toggle" id="nav-toggle" aria-label="menu" aria-expanded="false">☰</button>
+  <nav class="nav" id="nav">
+    <button data-nav="home" class="navbtn">Lectures</button>
+    <button data-nav="archived" class="navbtn archived-nav hidden">📦 Archived</button>
+    <button data-nav="new" class="navbtn">＋ New</button>
+    <button data-nav="settings" class="navbtn">Keys</button>
+    <button data-nav="upgrade" class="navbtn upgrade-nav">✨ Study+</button>
+    <button data-nav="help" class="navbtn">Help</button>
+  </nav>
+</header>
+
+<!-- study-tool icon sprite (defined once, reused via <use> in the tiles + lecture toolbar) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="g-fc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8067c4"/><stop offset="1" stop-color="#634aa0"/></linearGradient>
+  <linearGradient id="g-qz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f38aa2"/><stop offset="1" stop-color="#e46a86"/></linearGradient>
+  <linearGradient id="g-rc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28bcae"/><stop offset="1" stop-color="#0e9a92"/></linearGradient>
+  <symbol id="ic-cards" viewBox="0 0 64 64">
+    <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g-fc)"/>
+    <rect x="18" y="21" width="28" height="23" rx="5" fill="#ffffff" opacity=".5" transform="rotate(-10 32 33)"/>
+    <rect x="19" y="22" width="28" height="23" rx="5" fill="#ffffff"/>
+    <rect x="24" y="28" width="18" height="3.4" rx="1.7" fill="#7d64c0"/>
+    <rect x="24" y="35" width="12" height="3.4" rx="1.7" fill="#c9bce8"/>
+  </symbol>
+  <symbol id="ic-quiz" viewBox="0 0 64 64">
+    <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g-qz)"/>
+    <rect x="17" y="16" width="30" height="32" rx="5" fill="#ffffff"/>
+    <circle cx="25" cy="26" r="4.2" fill="#e46a86"/>
+    <path d="M22.9 26 l1.7 1.7 l3.1-3.3" fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="32" y="24.3" width="11" height="3.2" rx="1.6" fill="#f6c3ce"/>
+    <circle cx="25" cy="37" r="4.2" fill="none" stroke="#f0a9b8" stroke-width="2"/>
+    <rect x="32" y="35.3" width="11" height="3.2" rx="1.6" fill="#f6c3ce"/>
+  </symbol>
+  <symbol id="ic-recite" viewBox="0 0 64 64">
+    <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g-rc)"/>
+    <rect x="27" y="18" width="10" height="20" rx="5" fill="#ffffff"/>
+    <path d="M22 33 a10 10 0 0 0 20 0" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <rect x="30.5" y="41" width="3" height="6" rx="1.5" fill="#ffffff"/>
+    <rect x="25" y="46" width="14" height="3" rx="1.5" fill="#ffffff"/>
+    <path d="M17.5 27.5 a6 6 0 0 0 0 9" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>
+    <path d="M46.5 27.5 a6 6 0 0 1 0 9" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>
+  </symbol>
+</defs></svg>
+
+<main id="main">
+
+  <!-- HOME -->
+  <section id="view-home" class="view">
+    <!-- Akash: a little 8-bit pup who quietly wanders the home page -->
+    <div id="akash" class="akash" aria-hidden="true"><span class="akash-body"><svg viewBox="0 0 18 13">
+      <rect x="1" y="3" width="1" height="3" fill="#7c5fb0"/><rect x="2" y="2" width="1" height="2" fill="#7c5fb0"/>
+      <rect x="6" y="8" width="1" height="3" fill="#9a7fce"/><rect x="10" y="8" width="1" height="3" fill="#9a7fce"/>
+      <rect x="2" y="5" width="2" height="3" fill="#b79be6"/><rect x="3" y="5" width="9" height="3" fill="#b79be6"/>
+      <rect x="4" y="4" width="7" height="1" fill="#b79be6"/><rect x="3" y="7" width="9" height="1" fill="#9a7fce"/>
+      <rect x="11" y="3" width="2" height="5" fill="#b79be6"/><rect x="12" y="2" width="4" height="4" fill="#b79be6"/>
+      <rect x="16" y="4" width="1" height="2" fill="#b79be6"/>
+      <rect x="12" y="1" width="2" height="1" fill="#7c5fb0"/><rect x="12" y="2" width="1" height="1" fill="#7c5fb0"/>
+      <rect x="14" y="3" width="1" height="1" fill="#2a2036"/><rect x="16" y="4" width="1" height="1" fill="#2a2036"/>
+      <rect x="4" y="8" width="1" height="3" fill="#7c5fb0"/><rect x="12" y="8" width="1" height="3" fill="#7c5fb0"/>
+    </svg></span></div>
+    <div class="wrap">
+      <div id="key-warning" class="banner hidden">
+        No API key set yet. <button class="link" data-nav="settings">Add your Gemini key</button> to make notes.
+      </div>
+
+      <!-- 1 · your notes -->
+      <section class="home-sec">
+        <div class="home-sec-top">
+          <h2 class="home-sec-h">📚 your notes</h2>
+          <button class="link archived-link hidden" data-nav="archived">📦 archived</button>
+        </div>
+        <div id="lecture-list" class="lecture-list"></div>
+        <div id="empty-lectures" class="empty hidden"><svg class="doodle doodle-lg" aria-hidden="true" viewBox="0 0 100 100"><use href="#d-flower"/></svg><p>no notes yet — make your first one below.</p><button class="btn" id="load-sample">📓 load the sample note</button></div>
+      </section>
+
+      <!-- 2 · make a new note -->
+      <section class="home-sec">
+        <h2 class="home-sec-h">➕ make a new note</h2>
+        <button class="create-tile" data-nav="new">
+          <span class="create-ic">🎙️</span>
+          <span class="create-tx"><b>new study notes</b><small>record class, upload audio, or type your questions</small></span>
+          <span class="create-arrow">→</span>
+        </button>
+      </section>
+
+      <!-- 3 · study tools -->
+      <section class="home-sec">
+        <h2 class="home-sec-h">🎓 study tools <span class="sec-plus">✨ study+</span></h2>
+        <div class="tool-grid">
+          <button class="tool-tile" data-tool="cards">
+            <span class="tool-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-cards"/></svg></span><span class="tool-name">flashcards</span>
+          </button>
+          <button class="tool-tile" data-tool="quiz">
+            <span class="tool-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-quiz"/></svg></span><span class="tool-name">quiz</span>
+          </button>
+          <button class="tool-tile" data-tool="recite">
+            <span class="tool-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-recite"/></svg></span><span class="tool-name">recite</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 4 · study coach / agents -->
+      <section class="home-sec">
+        <h2 class="home-sec-h">🐾 your study coach</h2>
+        <button class="coach-card" id="coach-card">
+          <div class="coach-head"><span class="coach-emoji">🐶</span>
+            <span class="coach-title"><b>sprinkles, your study coach</b><small class="coach-soon">coming soon</small></span>
+          </div>
+          <p class="coach-blurb">i’ll look at what’s due, what’s weak, and your exam dates, and tell you exactly what to study today — plus set reminders right on your iPad.</p>
+        </button>
+      </section>
+    </div>
+  </section>
+
+  <!-- NEW -->
+  <section id="view-new" class="view hidden">
+    <div class="wrap">
+      <button class="btn ghost back-btn" data-nav="home">← Lectures</button>
+      <h1 class="page-h1">New study notes</h1>
+
+      <div class="filecard">
+        <div class="filecard-head"><span class="step">1</span> Recording <span class="opt">optional</span></div>
+
+        <div class="atabs" id="audio-tabs" role="tablist">
+          <button type="button" class="atab active" data-atab="record" role="tab">🎙️ <span>Record Live</span></button>
+          <button type="button" class="atab" data-atab="library" role="tab">📂 <span>Your Library</span></button>
+          <button type="button" class="atab" data-atab="upload" role="tab">⬆️ <span>Upload File</span></button>
+        </div>
+
+        <!-- RECORD LIVE -->
+        <div class="apanel" data-apanel="record">
+          <div id="recorder" class="recorder hidden">
+            <div id="rec-idle" class="rec-idle">
+              <button type="button" id="rec-btn" class="rec-circle" aria-label="Start recording"><span class="rec-circle-dot"></span></button>
+              <div class="rec-start-label">Start Recording</div>
+              <div class="rec-start-sub" id="rec-cta-sub">see a live transcript as you go</div>
+            </div>
+
+            <div id="rec-live" class="rec-panel hidden">
+              <div class="rec-panel-top">
+                <span class="rec-status"><span class="rec-dot live"></span> <span id="rec-state">recording</span></span>
+                <span class="rec-time" id="rec-time">0:00</span>
+              </div>
+              <div class="rec-wave" id="rec-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="rec-cc" id="rec-cc">
+                <div class="rec-cc-h">live transcript</div>
+                <div class="rec-cc-body" id="rec-transcript"><span class="rec-cc-hint" id="rec-cc-hint">listening… your words will show up here.</span></div>
+              </div>
+              <div class="rec-ctrls">
+                <button type="button" id="rec-pause" class="btn ghost small">pause</button>
+                <button type="button" id="rec-stop" class="btn rec-stop small">■ stop &amp; save</button>
+              </div>
+              <div class="rec-tip">keep NAS open and your screen on while recording.</div>
+            </div>
+
+            <div id="rec-msg" class="rec-msg hidden"></div>
+          </div>
+          <div id="rec-unsupported" class="apanel-hint hidden">recording isn’t supported in this browser — use <b>Upload File</b> instead.</div>
+        </div>
+
+        <!-- YOUR LIBRARY -->
+        <div class="apanel hidden" data-apanel="library">
+          <div id="rec-list" class="rec-list"></div>
+          <div id="rec-empty" class="apanel-hint">no saved recordings yet — record a class and it’ll be saved here.</div>
+        </div>
+
+        <!-- UPLOAD FILE -->
+        <div class="apanel hidden" data-apanel="upload">
+          <label class="uploader" for="audio-input">
+            <span class="uploader-ic">⬆️</span>
+            <span class="uploader-tx"><b>choose an audio file</b><small>full hour-plus review sessions are fine (<span id="size-hint">up to ~200&nbsp;MB</span>)</small></span>
+          </label>
+          <input type="file" id="audio-input" accept="audio/*,.m4a,.mp3,.wav,.aac,.ogg">
+        </div>
+
+        <!-- SELECTED (shared across tabs) -->
+        <div id="audio-selected" class="audio-selected hidden">
+          <div class="sel-row">
+            <span class="sel-check">✓</span>
+            <span class="sel-label" id="sel-label"></span>
+            <button type="button" class="sel-clear" id="sel-clear" title="clear selection" aria-label="clear selection">✕</button>
+          </div>
+          <label class="checkrow"><input type="checkbox" id="has-answers"> this recording already includes the answers</label>
+        </div>
+      </div>
+
+      <div class="filecard">
+        <div class="filecard-head"><span class="step">2</span> Or type the questions <span class="opt">optional</span></div>
+        <div class="filecard-hint">Paste your question list, one per line — use this when you don’t have a recording of them.</div>
+        <textarea id="questions-text" class="qtext" placeholder="1. Two effects of thyroid hormone&#10;2. Compare protein vs. steroid hormone action&#10;3. …"></textarea>
+      </div>
+
+      <div class="filecard">
+        <div class="filecard-head"><span class="step">3</span> Chapter notes <span class="opt">optional</span></div>
+        <div class="filecard-hint">Your chapter PowerPoint (.pptx) or PDF — used to write answers when the recording doesn’t already have them.</div>
+        <input type="file" id="notes-input" accept=".pptx,.pdf,.txt">
+        <div class="filename" id="notes-name">No file chosen</div>
+      </div>
+
+      <div class="filecard">
+        <div class="filecard-head"><span class="step">4</span> Or type the answers <span class="opt">optional</span></div>
+        <div class="filecard-hint">One per line, matching your questions in order — fill in the answers yourself, no internet needed.</div>
+        <textarea id="answers-text" class="qtext" placeholder="1. Raises metabolic rate; increases heart rate&#10;2. Steroid = lipid-soluble, receptors inside the cell; protein = water-soluble, receptors on the surface&#10;3. …"></textarea>
+      </div>
+
+      <div class="center-btn"><button class="btn primary" id="process-btn">Make my study notes</button></div>
+      <div id="process-status" class="status hidden"></div>
+    </div>
+  </section>
+
+  <!-- LECTURE (Q&A view) -->
+  <section id="view-lecture" class="view hidden">
+    <div class="wrap">
+      <div class="lecture-toolbar no-print">
+        <button class="btn ghost" data-nav="home">← All lectures</button>
+        <div class="spacer"></div>
+        <button class="btn" id="cards-btn"><span class="btn-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-cards"/></svg></span>Flashcards ✨</button>
+        <button class="btn" id="quiz-btn"><span class="btn-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-quiz"/></svg></span>Quiz Me ✨</button>
+        <button class="btn" id="recite-btn"><span class="btn-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ic-recite"/></svg></span>Recite ✨</button>
+        <button class="btn" id="toggle-answers">Hide answers</button>
+        <button class="btn" id="export-btn">📄 export</button>
+      </div>
+      <div id="lecture-body"></div>
+    </div>
+
+    <!-- Flashcards (free — built from the lecture's own Q&A, no API) -->
+    <div id="flashcards" class="cards-overlay hidden">
+      <div class="cards-top">
+        <button class="btn ghost" id="cards-close">✕ Close</button>
+        <div class="cards-count" id="cards-count">1 / 1</div>
+        <button class="btn ghost" id="cards-shuffle">✨ Shuffle</button>
+      </div>
+      <div class="cards-progress"><div class="cards-progress-fill" id="cards-progress"></div></div>
+      <div class="card-flip" id="card-flip">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-label">question</div>
+            <div id="card-q"></div>
+            <div class="card-tap">tap to flip</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-label">answer</div>
+            <div id="card-a"></div>
+          </div>
+        </div>
+      </div>
+      <div class="cards-nav">
+        <button class="btn" id="cards-prev">‹ Prev</button>
+        <button class="btn primary" id="cards-flip">Flip</button>
+        <button class="btn" id="cards-next">Next ›</button>
+      </div>
+    </div>
+
+    <!-- Multiple-choice quiz (Study+) — Gemini writes the options; single-answer or select-all-that-apply -->
+    <div id="quiz" class="cards-overlay quiz-overlay hidden">
+      <div class="cards-top">
+        <button class="btn ghost" id="quiz-close">✕ Close</button>
+        <div class="cards-count" id="quiz-count">1 / 1</div>
+        <div class="quiz-score" id="quiz-score">0 ✓</div>
+      </div>
+      <div class="cards-progress"><div class="cards-progress-fill" id="quiz-progress"></div></div>
+      <div id="quiz-loading" class="quiz-loading hidden"></div>
+      <div id="quiz-body">
+        <div class="quiz-kind" id="quiz-kind"></div>
+        <div class="quiz-q" id="quiz-q"></div>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="cards-nav"><button class="btn primary" id="quiz-next" disabled>Next ›</button></div>
+      </div>
+      <div id="quiz-results" class="quiz-results hidden">
+        <div class="quiz-result-score" id="quiz-result-score"></div>
+        <div class="quiz-result-msg" id="quiz-result-msg"></div>
+        <div class="cards-nav">
+          <button class="btn" id="quiz-retake">↻ Retake</button>
+          <button class="btn primary" id="quiz-done">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice recitation quiz (Study+) — reads each question aloud; answer by text OR voice; Gemini grades -->
+    <div id="recite" class="cards-overlay recite-overlay hidden">
+      <div class="cards-top">
+        <button class="btn ghost" id="recite-close">✕ close</button>
+        <div class="cards-count" id="recite-count">1 / 1</div>
+        <div class="quiz-score" id="recite-score">0 ✓</div>
+      </div>
+      <div class="cards-progress"><div class="cards-progress-fill" id="recite-progress"></div></div>
+
+      <div id="recite-body">
+        <div class="recite-qcard">
+          <div class="recite-qlabel">🔊 question <span id="recite-n"></span></div>
+          <div class="recite-q" id="recite-q"></div>
+          <button type="button" class="btn ghost small recite-replay" id="recite-replay">🔊 read again</button>
+        </div>
+
+        <div id="recite-answer" class="recite-answer">
+          <textarea id="recite-input" class="qtext" placeholder="type your answer, or tap the mic to speak it…"></textarea>
+          <div class="recite-controls">
+            <button type="button" class="btn recite-mic" id="recite-mic"><span class="rec-dot"></span> <span id="recite-mic-tx">speak answer</span></button>
+            <button type="button" class="btn primary" id="recite-submit">submit answer</button>
+          </div>
+          <div id="recite-mic-msg" class="rec-msg hidden"></div>
+        </div>
+
+        <div id="recite-grading" class="quiz-loading hidden">✨ grading your answer…</div>
+
+        <div id="recite-feedback" class="recite-feedback hidden">
+          <div class="recite-verdict" id="recite-verdict"></div>
+          <div class="recite-fb" id="recite-fb"></div>
+          <details class="recite-ideal"><summary>see the ideal answer</summary><div id="recite-ideal-body"></div></details>
+          <div class="cards-nav"><button type="button" class="btn primary" id="recite-next">next ›</button></div>
+        </div>
+      </div>
+
+      <div id="recite-results" class="quiz-results hidden">
+        <div class="quiz-result-score" id="recite-result-score"></div>
+        <div class="quiz-result-msg" id="recite-result-msg"></div>
+        <div class="cards-nav">
+          <button class="btn" id="recite-retake">↻ again</button>
+          <button class="btn primary" id="recite-done">done</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="view-settings" class="view hidden">
+    <div class="wrap">
+      <h1 class="page-h1">Gemini API key</h1>
+      <p class="sub">Your key is stored <b>only on this device</b> and is sent only to Google.
+        Nothing is shared with anyone else. New here?
+        <button class="link" data-nav="help">See how to get a key →</button></p>
+
+      <div class="field">
+        <label for="gemini-key">Gemini key <span class="muted">(Google — free; makes the questions and answers)</span></label>
+        <div class="key-row">
+          <input type="password" id="gemini-key" placeholder="AIza…" autocomplete="off">
+          <button type="button" class="btn ghost show-key" id="toggle-key">Show</button>
+        </div>
+        <div class="filecard-hint">Paste a new key here anytime and tap Save to update it.</div>
+      </div>
+
+      <details class="advanced">
+        <summary>Advanced: choose model</summary>
+        <div class="field">
+          <label for="gemini-model">Gemini model</label>
+          <select id="gemini-model">
+            <option value="gemini-3-flash-preview">Gemini 3 Flash — recommended (big free limit)</option>
+            <option value="gemini-3.1-flash-lite">3.1 Flash-Lite — lightest, lots of free requests</option>
+            <option value="gemini-flash-lite-latest">Flash-Lite (auto-updates)</option>
+            <option value="gemini-flash-latest">Flash-latest — newest, tiny free limit</option>
+          </select>
+        </div>
+      </details>
+
+      <div class="field">
+        <label>appearance</label>
+        <div class="appearance">
+          <div class="seg-row"><span class="seg-label">theme</span>
+            <div class="seg" id="seg-theme">
+              <button type="button" data-theme-opt="system">auto</button>
+              <button type="button" data-theme-opt="light">light</button>
+              <button type="button" data-theme-opt="dark">dark</button>
+            </div>
+          </div>
+          <div class="seg-row"><span class="seg-label">text case</span>
+            <div class="seg" id="seg-case">
+              <button type="button" data-case-opt="lower">lowercase</button>
+              <button type="button" data-case-opt="normal">Normal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn primary" id="save-keys">Save</button>
+        <button class="btn ghost" id="clear-keys">Clear keys from this device</button>
+      </div>
+      <div id="settings-status" class="status hidden"></div>
+    </div>
+  </section>
+
+  <!-- HELP -->
+  <section id="view-help" class="view hidden">
+    <div class="wrap help">
+      <button class="btn ghost back-btn" data-nav="settings">← Back to Keys</button>
+      <h1 class="page-h1">How to get your API key</h1>
+      <p class="sub">You need one free key, one time. Each person uses their own. It takes about 2 minutes.</p>
+
+      <div class="keycard">
+        <h2><span class="badge g">Gemini</span> Google key — free</h2>
+        <p class="keynote">This does everything — turns the recording into questions and writes the answers
+          from your notes. Google gives it out free.</p>
+        <ol>
+          <li>On your iPad, open <b>aistudio.google.com/apikey</b> in Safari.</li>
+          <li>Sign in with your <b>Google account</b> (any Gmail works).</li>
+          <li>Tap <b>“Create API key”</b>.</li>
+          <li>If it asks, choose <b>“Create API key in new project”</b>.</li>
+          <li>Tap <b>Copy</b>. The key starts with <b>AIza…</b></li>
+          <li>Come back here → <b>Keys</b> → paste it in the <b>Gemini key</b> box → <b>Save</b>.</li>
+        </ol>
+        <p class="keynote small">Free limit is about 10 lectures a day. Plenty for studying.</p>
+      </div>
+
+      <div class="keycard soft">
+        <h2>Add to your Home Screen</h2>
+        <ol>
+          <li>In Safari, tap the <b>Share</b> button (the square with an arrow).</li>
+          <li>Tap <b>“Add to Home Screen”</b>.</li>
+          <li>It now opens like a real app, with your keys saved.</li>
+        </ol>
+      </div>
+
+      <div class="keycard soft">
+        <h2>found a bug?</h2>
+        <p class="keynote">tell nakash what went wrong and we’ll fix it.</p>
+        <button class="btn primary" id="report-btn">🐞 <span class="cc">bugReport</span></button>
+      </div>
+
+      <button class="btn primary" data-nav="settings">Go to Keys →</button>
+    </div>
+  </section>
+
+  <!-- UPGRADE / STUDY+ -->
+  <section id="view-upgrade" class="view hidden">
+    <div class="wrap">
+      <button class="btn ghost back-btn" id="upgrade-back">← Notes</button>
+      <h1 class="page-h1">✨ Study+</h1>
+
+      <div id="paid-banner" class="banner ok-banner hidden"><svg class="doodle" aria-hidden="true" viewBox="0 0 100 100"><use href="#d-star"/></svg>Study+ is unlocked on this device. Thank you!</div>
+
+      <p class="sub" id="upgrade-sub">Unlocks <b>live transcript while recording</b>, <b>flashcards</b>,
+        the <b>multiple-choice quiz</b>, and <b>homework-photo matching</b>. The AI features use more AI,
+        so you’ll also want a billing-enabled Gemini key.</p>
+
+      <div id="upgrade-body">
+        <div class="pay-h">Pay any way you like — then enter the unlock code nakash sends you.</div>
+        <div id="pay-list" class="pay-list"></div>
+
+        <div class="field unlock-field">
+          <label for="unlock-code">Enter your unlock code</label>
+          <div class="key-row">
+            <input type="text" id="unlock-code" placeholder="STUDY-XXXXX" autocomplete="off" autocapitalize="characters">
+            <button type="button" class="btn primary" id="unlock-btn">Unlock</button>
+          </div>
+          <div id="unlock-status" class="status hidden"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHIVED -->
+  <section id="view-archived" class="view hidden">
+    <div class="wrap">
+      <button class="btn ghost back-btn" data-nav="home">← lectures</button>
+      <h1 class="page-h1">Archived notes</h1>
+      <div id="archived-list" class="lecture-list"></div>
+      <div id="empty-archived" class="empty hidden"><svg class="doodle doodle-lg" aria-hidden="true" viewBox="0 0 100 100"><use href="#d-face"/></svg><p>Nothing archived.</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <img src="pup.png" alt="nakash the superPup"><span>powered by <b>nakash</b> the superPup</span><span class="fver" id="app-version"></span>
+</footer>
+
+<div id="modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<div id="report" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">🐞 <span class="cc">bugReport</span></div>
+    <div class="modal-msg">what happened? tell me what you did and what went wrong.</div>
+    <textarea id="report-text" class="qtext" placeholder="e.g. the quiz got stuck on question 3…"></textarea>
+    <div id="report-status" class="status hidden"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="report-close">cancel</button>
+      <button class="btn" id="report-copy">copy</button>
+      <button class="btn primary" id="report-email">email it</button>
+    </div>
+  </div>
+</div>
+
+<script src="sample.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

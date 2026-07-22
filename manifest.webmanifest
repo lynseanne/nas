@@ -1,0 +1,16 @@
+{
+  "name": "NAS",
+  "short_name": "NAS",
+  "description": "Turn a lecture recording and chapter notes into study questions and answers.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f5fa",
+  "theme_color": "#6b4ea8",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
