@@ -1,9 +1,17 @@
 :root{
-  --ink:#1B1526; --muted:#6E6480; --line:#E9E0D4; --card:#ffffff; --bg:#FBF5EC;
-  --accent:#CB217E; --accent-soft:#FDE9F3; --accent-line:#F8CBE3;
+  /* Light = the Klo product-mockup palette, verbatim where it passes contrast.
+     Ground #f1eadd with the mockup's two radial washes; --bg stays a FLAT colour because
+     chips, textareas and overlays fill with it and a gradient would tile inside them. */
+  --ink:#1B1526; --muted:#5c5470; --muted-2:#928aa6; --line:#e6dccb; --card:#ffffff;
+  --bg:#f1eadd; --cream:#FBF5EC; --mint:#EFF6F1;
+  --bg-wash:radial-gradient(760px 440px at 10% -6%, #f6e6ef, transparent 60%),
+            radial-gradient(720px 480px at 108% 2%, #e6f4ef, transparent 58%);
+  /* Oink Pink one step darker than the mockup's #E22C8E: on this warmer ground the
+     mockup value reads at 4.33:1, under AA. #C41E79 clears text and white-on-fill both. */
+  --accent:#C41E79; --accent-soft:#FDE9F3; --accent-line:#F8CBE3;
   --pink:#FDE9F3; --pink-line:#F8A8CE; --pink-ink:#B01F6E;
   --term-ink:#2F6B22; --term-bg:#EAF7E6; --term-line:#C6E8BB;
-  --ok:#2F6B22; --err:#C0361C; --rec:#CB217E; --ans-bg:#E2F7FA; --ans-line:#A6E5EE; --ans-ink:#0A6F7C;
+  --ok:#2F6B22; --err:#C0361C; --rec:#C41E79; --ans-bg:#E2F7FA; --ans-line:#A6E5EE; --ans-ink:#0A6F7C;
   /* couch confetti — accents only, never large fills */
   --c-oink:#E22C8E; --c-bubble:#F58ABF; --c-moo:#14BCD1; --c-cobalt:#2A57D4; --c-grape:#8A3DC6;
   --c-meadow:#5FBE44; --c-marigold:#F4B62C; --c-coral:#F1663F; --c-sky:#63C6E8; --c-outline:#1B1526;
@@ -17,15 +25,24 @@
     --ok:#8FD97A; --err:#F0857C; --rec:#F58ABF; --ans-bg:#0F2A30; --ans-line:#2A5560; --ans-ink:#5FD6E4;
     --c-oink:#F58ABF; --c-bubble:#F8AED2; --c-moo:#4FD3E4; --c-cobalt:#7C9BF0; --c-grape:#B98AE6;
     --c-meadow:#8FD97A; --c-marigold:#F7CC63; --c-coral:#F79070; --c-sky:#94DCF2; --c-outline:#0D0918;
+    --muted-2:#7D719B; --cream:#1F1730; --mint:#152A26; --bg-wash:none;
   }
 }
 /* manual theme override (Appearance settings) — wins over the system preference above */
 :root[data-theme="light"]{
-  --ink:#1B1526; --muted:#6E6480; --line:#E9E0D4; --card:#ffffff; --bg:#FBF5EC;
-  --accent:#CB217E; --accent-soft:#FDE9F3; --accent-line:#F8CBE3;
+  /* Light = the Klo product-mockup palette, verbatim where it passes contrast.
+     Ground #f1eadd with the mockup's two radial washes; --bg stays a FLAT colour because
+     chips, textareas and overlays fill with it and a gradient would tile inside them. */
+  --ink:#1B1526; --muted:#5c5470; --muted-2:#928aa6; --line:#e6dccb; --card:#ffffff;
+  --bg:#f1eadd; --cream:#FBF5EC; --mint:#EFF6F1;
+  --bg-wash:radial-gradient(760px 440px at 10% -6%, #f6e6ef, transparent 60%),
+            radial-gradient(720px 480px at 108% 2%, #e6f4ef, transparent 58%);
+  /* Oink Pink one step darker than the mockup's #E22C8E: on this warmer ground the
+     mockup value reads at 4.33:1, under AA. #C41E79 clears text and white-on-fill both. */
+  --accent:#C41E79; --accent-soft:#FDE9F3; --accent-line:#F8CBE3;
   --pink:#FDE9F3; --pink-line:#F8A8CE; --pink-ink:#B01F6E;
   --term-ink:#2F6B22; --term-bg:#EAF7E6; --term-line:#C6E8BB;
-  --ok:#2F6B22; --err:#C0361C; --rec:#CB217E; --ans-bg:#E2F7FA; --ans-line:#A6E5EE; --ans-ink:#0A6F7C;
+  --ok:#2F6B22; --err:#C0361C; --rec:#C41E79; --ans-bg:#E2F7FA; --ans-line:#A6E5EE; --ans-ink:#0A6F7C;
   /* couch confetti — accents only, never large fills */
   --c-oink:#E22C8E; --c-bubble:#F58ABF; --c-moo:#14BCD1; --c-cobalt:#2A57D4; --c-grape:#8A3DC6;
   --c-meadow:#5FBE44; --c-marigold:#F4B62C; --c-coral:#F1663F; --c-sky:#63C6E8; --c-outline:#1B1526;
@@ -38,6 +55,7 @@
   --ok:#8FD97A; --err:#F0857C; --rec:#F58ABF; --ans-bg:#0F2A30; --ans-line:#2A5560; --ans-ink:#5FD6E4;
   --c-oink:#F58ABF; --c-bubble:#F8AED2; --c-moo:#4FD3E4; --c-cobalt:#7C9BF0; --c-grape:#B98AE6;
   --c-meadow:#8FD97A; --c-marigold:#F7CC63; --c-coral:#F79070; --c-sky:#94DCF2; --c-outline:#0D0918;
+    --muted-2:#7D719B; --cream:#1F1730; --mint:#152A26; --bg-wash:none;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -47,7 +65,9 @@ body{text-transform:lowercase;}
 input, textarea{text-transform:none;}
 /* user can switch the whole app to true case (Appearance settings) */
 .truecase body{text-transform:none;}
-body{margin:0; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased;
+body{margin:0; background-color:var(--bg); background-image:var(--bg-wash);
+  background-attachment:fixed; background-repeat:no-repeat; color:var(--ink);
+  -webkit-font-smoothing:antialiased;
   font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   display:flex; flex-direction:column; min-height:100vh;}
 #main{flex:1 0 auto;}
@@ -597,3 +617,7 @@ body.hide-answers .answer .abody{filter:blur(7px); -webkit-filter:blur(7px); poi
 .empty .doodle-lg{opacity:.95}
 .ok-banner{display:flex;align-items:center;gap:10px}
 .ok-banner .doodle{width:26px;height:26px;vertical-align:middle}
+
+/* the plain-english line under the appearance toggles — students should be able to
+   read what is counted without hunting for a policy page */
+.seg-note{font-size:11.5px; line-height:1.5; color:var(--muted); margin:8px 2px 0; max-width:46ch;}

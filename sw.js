@@ -1,7 +1,7 @@
 /* Service worker — caches the app shell so it installs to the Home Screen and opens offline.
    The AI calls (Gemini, Claude) always go to the network; only the UI is cached.
    Bump CACHE when app files change so users get the update. */
-const CACHE = 'nas-v60';
+const CACHE = 'nas-v62';
 const SHELL = [
   './', './index.html', './app.css', './app.js', './sample.js',
   './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'
